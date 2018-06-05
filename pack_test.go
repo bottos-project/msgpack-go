@@ -1,25 +1,45 @@
+// Copyright 2017~2022 The Bottos Authors
+// This file is part of the Bottos Chain library.
+// Created by Rocket Core Team of Bottos.
+
+//This program is free software: you can distribute it and/or modify
+//it under the terms of the GNU General Public License as published by
+//the Free Software Foundation, either version 3 of the License, or
+//(at your option) any later version.
+
+//This program is distributed in the hope that it will be useful,
+//but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//GNU General Public License for more details.
+
+//You should have received a copy of the GNU General Public License
+// along with bottos.  If not, see <http://www.gnu.org/licenses/>.
+
+/*
+ * file description:  msgpack go
+ * @Author: Gong Zibin
+ * @Date:   2017-12-20
+ * @Last Modified by:
+ * @Last Modified time:
+ */
 package msgpack
 
 import (
 	"fmt"
 	//"bytes"
-	"testing"
 	"encoding/hex"
+	"testing"
 )
-
 
 func BytesToHex(d []byte) string {
 	return hex.EncodeToString(d)
 }
-
 
 func HexToBytes(str string) ([]byte, error) {
 	h, err := hex.DecodeString(str)
 
 	return h, err
 }
-
-
 
 func TestMarshalStruct(t *testing.T) {
 	type TestStruct struct{
@@ -41,7 +61,6 @@ func TestMarshalStruct(t *testing.T) {
 	err = Unmarshal(b, &ts1)
 	fmt.Println("ts1 ", ts1)
 }
-
 
 func TestMarshalNestStruct1(t *testing.T) {
 	type TestSubStruct struct{
@@ -160,9 +179,9 @@ func TestTransfer(t *testing.T) {
 
 	// marshal
 	ts := Transfer {
-		From: "delegate1",
-		To: "delegate2",
-		Value: 9999,
+		From:  "bottos",
+		To:    "bot",
+		Value: 100000000000,
 	}
 	b, err := Marshal(ts)
 	
@@ -171,6 +190,9 @@ func TestTransfer(t *testing.T) {
 
 	ts1 := &Transfer{}
 	err = Unmarshal(b, ts1)
+	fmt.Println("ts1: ", ts1)
+	cc, _ := HexToBytes("dc0004da00057474747474da000461666166cf000000003b9aca00da000c417072696c27732072656e74")
+	err = Unmarshal(cc, ts1)
 	fmt.Println("ts1: ", ts1)
 }
 
@@ -195,8 +217,6 @@ func TestNewAccount(t *testing.T) {
 	fmt.Println("param1: ", param1)
 }
 
-
-
 func TestDatafileReg(t *testing.T) {
 	type TestSubStruct struct{
 		V1 string
@@ -216,8 +236,8 @@ func TestDatafileReg(t *testing.T) {
 	fmt.Println("TestDatafileReg...")
 
 	ts := TestStruct {
-		V1: "filehashtest",
-		V2: &TestSubStruct{V1:"usernametest", V2:"sissidTest", V3:111, V4:"filenameTest",V5:"filepolicytest",V6:"authpathtest",V7:222,V8:"sign"},
+		V1: "12345678901234567890",
+		V2: &TestSubStruct{V1: "salertest", V2: "sissidTest", V3: 111, V4: "filenameTest", V5: "filepolicytest", V6: "authpathtest", V7: 222, V8: "sign"},
 	}
 	b, err := Marshal(ts)
 
@@ -233,41 +253,35 @@ func TestAssetfileReg(t *testing.T) {
 	type TestSubStruct struct {
 		UserName    string
 		AssetName   string
-		AssetType   string
+		AssetType   uint64
 		FeatureTag  string
-		SamplePath  string
 		SampleHash  string
-		StoragePath string
 		StorageHash string
 		ExpireTime  uint32
+		OpType      uint32
 		Price       uint64
 		Description string
-		UploadDate  uint32
-		Signature   string
 	}
 
 	type TestStruct struct {
-		V1 string
-		V2 *TestSubStruct
+		AssetId string
+		V2      TestSubStruct
 	}
 	fmt.Println("TestAssetfileReg...")
 
 	ts := TestStruct{
-		V1: "assethashtest",
-		V2: &TestSubStruct{
+		AssetId: "98e0b84063b311e8a5e3d1b3c579b67f",
+		V2: TestSubStruct{
 			UserName:    "btd121",
 			AssetName:   "assetnametest",
-			AssetType:   "1231",
-			FeatureTag:   "1231",
-			SamplePath:  "pathtest",
-			SampleHash:  "samplehasttest",
-			StoragePath: "stpathtest",
-			StorageHash: "sthashtest",
-			ExpireTime:  345,
-			Price:       345,
+			AssetType:   12,
+			FeatureTag:  "FeatureTag",
+			SampleHash:  "43162f44ff5565b317ef3904c93ca525f0d739a86823bb5c1d08dbfcabbcde8c",
+			StorageHash: "43162f44ff5565b317ef3904c93ca525f0d739a86823bb5c1d08dbfcabbcde8c",
+			ExpireTime:  1527478061,
+			OpType:      1,
+			Price:       999999900000000,
 			Description: "destest",
-			UploadDate:  100,
-			Signature:   "sigtest",
 		},
 	}
 	b, err := Marshal(ts)
@@ -277,6 +291,9 @@ func TestAssetfileReg(t *testing.T) {
 
 	ts1 := TestStruct{}
 	err = Unmarshal(b, &ts1)
+	fmt.Println("ts1 ", ts1, err)
+	cc, _ := HexToBytes("dc0002da00206230356563613430363362363131653861313164623763303833663930643061dc000ada0003626f74da00046e616d65cf000000000000000eda0005312d312d31da0000da004066636336386466646632316639343432616134306361363062313262396639653332383239663332346566343532653730656533623434313465363164396434ce5b195680ce00000001cf00038d7e9ed09f00da0003313233")
+	err = Unmarshal(cc, &ts1)
 	fmt.Println("ts1 ", ts1, err)
 }
 
@@ -300,8 +317,6 @@ func TestUserReg(t *testing.T) {
 	err = Unmarshal(b, &ts1)
 	fmt.Println("ts1 ", ts1, err)
 }
-
-
 
 func TestAssetReg(t *testing.T) {
 	type TestSubStruct struct{
@@ -327,8 +342,8 @@ func TestAssetReg(t *testing.T) {
 	fmt.Println("TestAssetReg...")
 
 	ts := TestStruct {
-		V1: "assethashtest",
-		V2: &TestSubStruct{V1:"usernametest", V2:"assetname", V3:"assettypetest", V4:"tagtest",V5:"pathtest",V6:"hasttest",V7:"storepathtest",V8:"storehashtest",V9:11,V10:22,V11:"desctriptest",V12:333,V13:"signtest"},
+		V1: "23456789012345678901",
+		V2: &TestSubStruct{V1: "usernametest", V2: "assetname", V3: "assettypetest", V4: "tagtest", V5: "pathtest", V6: "hasttest", V7: "storepathtest", V8: "12345678901234567890", V9: 11, V10: 22, V11: "desctriptest", V12: 333, V13: "signtest"},
 	}
 	b, err := Marshal(ts)
 	
@@ -340,20 +355,18 @@ func TestAssetReg(t *testing.T) {
 	fmt.Println("ts1 ", ts1, err)
 }
 
-
-
-
 func TestDataReqReg(t *testing.T) {
 	type TestSubStruct struct{
 		V1 string
 		V2 string
 		V3 uint64
-		V4 string
+		V4  uint64
 		V5 string
-		V6 uint32
-		V7 uint64
-		V8 string
+		V6  uint64
+		V7  uint32
+		V8  uint64
 		V9 uint32
+		V10 string
 	}
 
 	type TestStruct struct{
@@ -363,8 +376,60 @@ func TestDataReqReg(t *testing.T) {
 	fmt.Println("TestDataReqReg...")
 
 	ts := TestStruct {
+		V1: "12345678901234567890",
+		V2: &TestSubStruct{V1: "usernametest", V2: "reqnametest", V3: 111, V4: 222, V5: "hasttest", V6: 222, V7: 2, V8: 333, V9: 444, V10: "desctriptest"},
+	}
+	b, err := Marshal(ts)
+
+	fmt.Printf("%v\n", BytesToHex(b))
+	fmt.Println(err)
+
+	ts1 := TestStruct{}
+	err = Unmarshal(b, &ts1)
+	fmt.Println("ts1 ", ts1, err)
+}
+
+func TestGoodsProReq(t *testing.T) {
+	type TestStruct struct {
+		V1 string
+		V2 uint32
+		V3 string
+		V4 string
+	}
+
+	fmt.Println("TestGoodsProReq...")
+
+	ts := TestStruct{V1: "usernametest", V2: 2, V3: "asset", V4: "goodsIdTest"}
+
+	b, err := Marshal(ts)
+
+	fmt.Printf("%v\n", BytesToHex(b))
+	fmt.Println(err)
+
+	ts1 := TestStruct{}
+	err = Unmarshal(b, &ts1)
+	fmt.Println("ts1 ", ts1, err)
+}
+
+func TestDataDeal_PreSaleReq(t *testing.T) {
+	type TestSubStruct struct {
+		V1 string
+		V2 string
+		V3 string
+		V4 string
+		V5 uint32
+		V6 uint64
+	}
+
+	type TestStruct struct {
+		V1 string
+		V2 *TestSubStruct
+	}
+	fmt.Println("TestDataDeal_PreSaleReq...")
+
+	ts := TestStruct{
 		V1: "12345678901234567899",
-		V2: &TestSubStruct{V1:"usernametest",  V2:"reqnametest", V3:111,V4:"pathtest",V5:"hasttest",V6:222,V7:333,V8:"desctriptest",V9:444},
+		V2: &TestSubStruct{V1: "usernametest", V2: "assetidTest", V3: "requireId", V4: "consumerId", V5: 2, V6: 222},
 	}
 	b, err := Marshal(ts)
 	
@@ -376,3 +441,29 @@ func TestDataReqReg(t *testing.T) {
 	fmt.Println("ts1 ", ts1, err)
 }
 
+func TestDataDeal_BuyAssetReq(t *testing.T) {
+	type TestSubStruct struct {
+		V1 string
+		V2 string
+		V3 uint64
+	}
+
+	type TestStruct struct {
+		V1 string
+		V2 *TestSubStruct
+	}
+	fmt.Println("TestDataDeal_BuyAssetReq...")
+
+	ts := TestStruct{
+		V1: "12345678901234567899",
+		V2: &TestSubStruct{V1: "buyertest", V2: "23456789012345678901", V3: 1234},
+	}
+	b, err := Marshal(ts)
+
+	fmt.Printf("%v\n", BytesToHex(b))
+	fmt.Println(err)
+
+	ts1 := TestStruct{}
+	err = Unmarshal(b, &ts1)
+	fmt.Println("ts1 ", ts1, err)
+}

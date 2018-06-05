@@ -1,12 +1,38 @@
+// Copyright 2017~2022 The Bottos Authors
+// This file is part of the Bottos Chain library.
+// Created by Rocket Core Team of Bottos.
+
+//This program is free software: you can distribute it and/or modify
+//it under the terms of the GNU General Public License as published by
+//the Free Software Foundation, either version 3 of the License, or
+//(at your option) any later version.
+
+//This program is distributed in the hope that it will be useful,
+//but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//GNU General Public License for more details.
+
+//You should have received a copy of the GNU General Public License
+// along with bottos.  If not, see <http://www.gnu.org/licenses/>.
+
+/*
+ * file description:  msgpack go
+ * @Author: Gong Zibin
+ * @Date:   2017-12-20
+ * @Last Modified by:
+ * @Last Modified time:
+ */
+
 package msgpack
 
 import (
+	"bytes"
+	"fmt"
 	"io"
 	"reflect"
-	"fmt"
-	"bytes"
 )
 
+//Marshal is to serialize the message
 func Marshal(v interface{}) ([]byte, error) {
 	writer := &bytes.Buffer{}
 	err := Encode(writer, v)
@@ -16,12 +42,14 @@ func Marshal(v interface{}) ([]byte, error) {
 	return writer.Bytes(), nil
 }
 
+//Unmarshal is to unserialize the message
 func Unmarshal(data []byte, dst interface{}) error {
 	r := bytes.NewReader(data)
 	err := Decode(r, dst)
 	return err
 }
 
+//Encode is to encode message
 func Encode(w io.Writer, structs interface{}) error {
 	v := reflect.ValueOf(structs)
 
@@ -49,7 +77,6 @@ func Encode(w io.Writer, structs interface{}) error {
 		val := reflect.ValueOf(values[i])
 
 		kind := t.Kind()
-		//fmt.Println(t, val, kind)
         switch kind {
         case reflect.String:
             PackStr16(w, val.String())
@@ -71,7 +98,7 @@ func Encode(w io.Writer, structs interface{}) error {
 			Encode(w, val.Interface())
 		case reflect.Ptr:
 			vvt := reflect.TypeOf(val.Elem().Interface())
-			if (vvt.Kind() == reflect.Struct) {
+			if vvt.Kind() == reflect.Struct {
 				Encode(w, val.Elem().Interface())
 			} else {
 				return fmt.Errorf("Unsupported Type: %T", val)
@@ -83,6 +110,7 @@ func Encode(w io.Writer, structs interface{}) error {
 	return nil
 }
 
+//Decode is to encode message
 func Decode(r io.Reader, dst interface{}) error {
 	v := reflect.ValueOf(dst)
 
